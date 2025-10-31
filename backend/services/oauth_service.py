@@ -237,8 +237,10 @@ def get_valid_credentials(user_id: str) -> Optional[Credentials]:
 
         # Check if token is expired or about to expire (within 5 minutes)
         if tokens.get("expires_at"):
+            from datetime import timezone
             expires_at = datetime.fromisoformat(tokens["expires_at"].replace('Z', '+00:00'))
-            if datetime.utcnow() >= expires_at - timedelta(minutes=5):
+            now_utc = datetime.now(timezone.utc)
+            if now_utc >= expires_at - timedelta(minutes=5):
                 print(f"Token expired or expiring soon, refreshing for user {user_id}")
                 refresh_access_token(user_id)
                 # Get fresh tokens

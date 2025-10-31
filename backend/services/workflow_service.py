@@ -22,7 +22,8 @@ def create_workflow(
     video_key: Optional[str] = None,
     description: Optional[str] = None,
     n8n_workflow_id: Optional[str] = None,
-    n8n_workflow_data: Optional[Dict[str, Any]] = None
+    n8n_workflow_data: Optional[Dict[str, Any]] = None,
+    status: str = "active"
 ) -> Dict[str, Any]:
     """Create a new workflow for a user."""
     try:
@@ -34,7 +35,7 @@ def create_workflow(
             "steps": steps,
             "n8n_workflow_id": n8n_workflow_id,
             "n8n_workflow_data": n8n_workflow_data,
-            "status": "active",
+            "status": status,
             "created_at": datetime.utcnow().isoformat(),
             "updated_at": datetime.utcnow().isoformat()
         }

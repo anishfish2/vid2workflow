@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from models.tools import ToolRequest, ToolResponse
-from middleware.auth import require_auth
 from services.google_api_service import (
     create_gmail_draft,
     send_gmail_message,
@@ -13,10 +12,10 @@ router = APIRouter()
 # Gmail Operations
 
 @router.post("/draft/create")
-async def create_email_draft_api(request: ToolRequest, user: Dict = Depends(require_auth)):
+async def create_email_draft_api(request: ToolRequest):
     """Create a new email draft"""
     try:
-        user_id = user["user_id"]
+        user_id = request.user_id
         to_recipients = request.params.get("to", "")
         cc_recipients = request.params.get("cc", "")
         bcc_recipients = request.params.get("bcc", "")
@@ -48,7 +47,7 @@ async def create_email_draft_api(request: ToolRequest, user: Dict = Depends(requ
         )
 
 @router.post("/draft/update")
-async def update_email_draft_api(request: ToolRequest, user: Dict = Depends(require_auth)):
+async def update_email_draft_api(request: ToolRequest):
     """Update an existing email draft"""
     try:
         draft_id = request.params.get("draft_id")
@@ -106,10 +105,10 @@ async def send_draft(request: ToolRequest):
         )
 
 @router.post("/message/send")
-async def send_email_api(request: ToolRequest, user: Dict = Depends(require_auth)):
+async def send_email_api(request: ToolRequest):
     """Send an email directly without creating a draft"""
     try:
-        user_id = user["user_id"]
+        user_id = request.user_id
         to_recipients = request.params.get("to", "")
         cc_recipients = request.params.get("cc", "")
         bcc_recipients = request.params.get("bcc", "")
@@ -141,7 +140,7 @@ async def send_email_api(request: ToolRequest, user: Dict = Depends(require_auth
         )
 
 @router.post("/message/reply")
-async def reply_to_email_api(request: ToolRequest, user: Dict = Depends(require_auth)):
+async def reply_to_email_api(request: ToolRequest):
     """Reply to an existing email thread"""
     try:
         thread_id = request.params.get("thread_id")
@@ -168,10 +167,10 @@ async def reply_to_email_api(request: ToolRequest, user: Dict = Depends(require_
         )
 
 @router.post("/message/list")
-async def list_messages_api(request: ToolRequest, user: Dict = Depends(require_auth)):
+async def list_messages_api(request: ToolRequest):
     """List messages with optional filters"""
     try:
-        user_id = user["user_id"]
+        user_id = request.user_id
         query = request.params.get("query", "")
         max_results = request.params.get("max_results", 10)
         label_ids = request.params.get("label_ids", None)
@@ -192,7 +191,7 @@ async def list_messages_api(request: ToolRequest, user: Dict = Depends(require_a
         )
 
 @router.post("/cc/add")
-async def add_cc_recipients_api(request: ToolRequest, user: Dict = Depends(require_auth)):
+async def add_cc_recipients_api(request: ToolRequest):
     """Add CC recipients to an email or draft"""
     try:
         draft_id = request.params.get("draft_id", None)

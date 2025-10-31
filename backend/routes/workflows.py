@@ -13,8 +13,13 @@ from services.workflow_service import (
     archive_workflow,
     get_workflow_count
 )
+import requests
+import os
 
 router = APIRouter()
+
+N8N_API_KEY = os.getenv("N8N_API_KEY")
+N8N_BASE_URL = os.getenv("N8N_BASE_URL", "http://localhost:5678/api/v1")
 
 
 class CreateWorkflowRequest(BaseModel):
@@ -220,3 +225,41 @@ async def get_workflow_stats(user: Dict = Depends(require_auth)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/{workflow_id}/execute")
+async def execute_workflow(
+    workflow_id: str,
+    user: Dict = Depends(require_auth)
+):
+    """Execute a workflow in n8n (manual execution via test)."""
+    try:
+        user_id = user["user_id"]
+
+        # Get workflow from database
+        workflow = get_workflow_by_id(workflow_id, user_id)
+
+        if not workflow:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+
+        # Check if workflow has n8n_workflow_id
+        n8n_workflow_id = workflow.get("n8n_workflow_id")
+        if not n8n_workflow_id:
+            raise HTTPException(status_code=400, detail="Workflow not created in n8n yet")
+
+        return {
+            "success": True,
+            "message": "Please use n8n UI to execute the workflow manually. Click 'Test workflow' in n8n.",
+            "n8n_workflow_id": n8n_workflow_id,
+            "n8n_url": f"http://localhost:5678/workflow/{n8n_workflow_id}",
+            "instructions": [
+                "1. Click 'Open in n8n' button",
+                "2. Click 'Test workflow' button in n8n",
+                "3. The workflow will execute all nodes"
+            ]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")

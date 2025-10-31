@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { executeWorkflow } from '@/lib/api';
 
 interface Workflow {
   id: string;
@@ -19,6 +20,7 @@ export default function WorkflowList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('active');
+  const [executingWorkflow, setExecutingWorkflow] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -114,6 +116,27 @@ export default function WorkflowList() {
       window.open(`http://localhost:5678/workflow/${workflowId}`, '_blank');
     } else {
       alert('This workflow has not been created in n8n yet');
+    }
+  };
+
+  const handleExecuteWorkflow = async (workflowId: string) => {
+    try {
+      setExecutingWorkflow(workflowId);
+      const result = await executeWorkflow(workflowId);
+
+      if (result.success && result.n8n_url) {
+        // Open n8n workflow in new tab
+        window.open(result.n8n_url, '_blank');
+        alert(result.message || 'Opening workflow in n8n. Click "Test workflow" button to execute.');
+      } else if (result.success) {
+        alert('Workflow executed successfully!');
+      } else {
+        alert(`Execution failed: ${result.message}`);
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to execute workflow');
+    } finally {
+      setExecutingWorkflow(null);
     }
   };
 
@@ -224,14 +247,27 @@ export default function WorkflowList() {
                 )}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {workflow.n8n_workflow_id && (
-                  <button
-                    onClick={() => openInN8n(workflow.n8n_workflow_id)}
-                    className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                  >
-                    Open in n8n
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleExecuteWorkflow(workflow.id)}
+                      disabled={executingWorkflow === workflow.id}
+                      className={`px-3 py-1 rounded text-sm font-medium ${
+                        executingWorkflow === workflow.id
+                          ? 'bg-green-300 text-green-700 cursor-not-allowed'
+                          : 'bg-green-500 text-white hover:bg-green-600'
+                      }`}
+                    >
+                      {executingWorkflow === workflow.id ? 'Running...' : 'Run Workflow'}
+                    </button>
+                    <button
+                      onClick={() => openInN8n(workflow.n8n_workflow_id)}
+                      className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                    >
+                      Open in n8n
+                    </button>
+                  </>
                 )}
                 <button
                   onClick={() => router.push(`/workflows/${workflow.id}`)}
