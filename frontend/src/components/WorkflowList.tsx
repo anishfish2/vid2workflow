@@ -168,7 +168,7 @@ export default function WorkflowList() {
             className={`px-4 py-2 rounded ${
               filter === 'active'
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700'
+                : 'bg-gray-200 text-black'
             }`}
           >
             Active
@@ -178,7 +178,7 @@ export default function WorkflowList() {
             className={`px-4 py-2 rounded ${
               filter === 'draft'
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700'
+                : 'bg-gray-200 text-black'
             }`}
           >
             Draft
@@ -188,7 +188,7 @@ export default function WorkflowList() {
             className={`px-4 py-2 rounded ${
               filter === 'archived'
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700'
+                : 'bg-gray-200 text-black'
             }`}
           >
             Archived
@@ -198,7 +198,7 @@ export default function WorkflowList() {
             className={`px-4 py-2 rounded ${
               filter === ''
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700'
+                : 'bg-gray-200 text-black'
             }`}
           >
             All
@@ -207,7 +207,7 @@ export default function WorkflowList() {
       </div>
 
       {workflows.length === 0 ? (
-        <div className="text-center text-gray-500 py-8">
+        <div className="text-center text-black py-8">
           No workflows found. Process a video to create your first workflow!
         </div>
       ) : (
@@ -221,7 +221,7 @@ export default function WorkflowList() {
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">{workflow.name}</h3>
                   {workflow.description && (
-                    <p className="text-gray-600 text-sm mt-1">
+                    <p className="text-black text-sm mt-1">
                       {workflow.description}
                     </p>
                   )}
@@ -232,14 +232,14 @@ export default function WorkflowList() {
                       ? 'bg-green-100 text-green-700'
                       : workflow.status === 'draft'
                       ? 'bg-yellow-100 text-yellow-700'
-                      : 'bg-gray-100 text-gray-700'
+                      : 'bg-gray-100 text-black'
                   }`}
                 >
                   {workflow.status}
                 </span>
               </div>
 
-              <div className="text-sm text-gray-500 mb-3">
+              <div className="text-sm text-black mb-3">
                 <div>Steps: {workflow.steps?.length || 0}</div>
                 <div>Created: {new Date(workflow.created_at).toLocaleDateString()}</div>
                 {workflow.video_key && (

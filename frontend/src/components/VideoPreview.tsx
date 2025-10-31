@@ -9,7 +9,7 @@ export default function VideoPreview({ videoSrc }: VideoPreviewProps) {
 
   return (
     <div className="w-full max-w-2xl">
-      <h3 className="text-lg font-semibold mb-2 text-gray-700">Video Preview:</h3>
+      <h3 className="text-lg font-semibold mb-2 text-black">Video Preview:</h3>
       <video
         controls
         className="w-full rounded-lg shadow"

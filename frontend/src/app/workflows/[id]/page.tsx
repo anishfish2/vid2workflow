@@ -102,7 +102,7 @@ export default function WorkflowDetailPage() {
             <div>
               <h1 className="text-3xl font-bold mb-2">{workflow.name}</h1>
               {workflow.description && (
-                <p className="text-gray-600">{workflow.description}</p>
+                <p className="text-black">{workflow.description}</p>
               )}
             </div>
             <span
@@ -111,7 +111,7 @@ export default function WorkflowDetailPage() {
                   ? 'bg-green-100 text-green-700'
                   : workflow.status === 'draft'
                   ? 'bg-yellow-100 text-yellow-700'
-                  : 'bg-gray-100 text-gray-700'
+                  : 'bg-gray-100 text-black'
               }`}
             >
               {workflow.status}
@@ -123,20 +123,20 @@ export default function WorkflowDetailPage() {
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-gray-500">Created</div>
+              <div className="text-sm text-black">Created</div>
               <div className="font-medium">
                 {new Date(workflow.created_at).toLocaleString()}
               </div>
             </div>
             <div>
-              <div className="text-sm text-gray-500">Last Updated</div>
+              <div className="text-sm text-black">Last Updated</div>
               <div className="font-medium">
                 {new Date(workflow.updated_at).toLocaleString()}
               </div>
             </div>
             {workflow.video_key && (
               <div>
-                <div className="text-sm text-gray-500">Source Video</div>
+                <div className="text-sm text-black">Source Video</div>
                 <div className="font-medium truncate">
                   {workflow.video_key.split('/').pop()}
                 </div>
@@ -144,7 +144,7 @@ export default function WorkflowDetailPage() {
             )}
             {workflow.n8n_workflow_id && (
               <div>
-                <div className="text-sm text-gray-500">n8n Workflow ID</div>
+                <div className="text-sm text-black">n8n Workflow ID</div>
                 <div className="font-medium">{workflow.n8n_workflow_id}</div>
               </div>
             )}
@@ -176,14 +176,14 @@ export default function WorkflowDetailPage() {
                         {step.action || step.name || `Step ${index + 1}`}
                       </h3>
                       {step.service && (
-                        <div className="text-sm text-gray-600 mb-2">
+                        <div className="text-sm text-black mb-2">
                           Service: <span className="font-medium">{step.service}</span>
                           {step.operation && ` → ${step.operation}`}
                         </div>
                       )}
                       {step.parameters && Object.keys(step.parameters).length > 0 && (
                         <div className="mt-2">
-                          <div className="text-sm font-medium text-gray-700 mb-1">Parameters:</div>
+                          <div className="text-sm font-medium text-black mb-1">Parameters:</div>
                           <div className="bg-gray-50 rounded p-2 text-xs font-mono">
                             <pre className="whitespace-pre-wrap">
                               {JSON.stringify(step.parameters, null, 2)}
@@ -196,7 +196,7 @@ export default function WorkflowDetailPage() {
                 </div>
               ))
             ) : (
-              <div className="text-gray-500 text-center py-4">No steps available</div>
+              <div className="text-black text-center py-4">No steps available</div>
             )}
           </div>
         </div>

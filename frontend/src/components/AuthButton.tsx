@@ -70,7 +70,7 @@ export default function AuthButton() {
 
   if (loading) {
     return (
-      <button className="px-4 py-2 bg-gray-200 text-gray-600 rounded" disabled>
+      <button className="px-4 py-2 bg-gray-200 text-black rounded" disabled>
         Loading...
       </button>
     );
@@ -79,7 +79,7 @@ export default function AuthButton() {
   if (isAuthenticated) {
     return (
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-black">
           Logged in as: {userEmail}
         </span>
         <button

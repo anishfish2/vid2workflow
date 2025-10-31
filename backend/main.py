@@ -12,11 +12,11 @@ from dotenv import load_dotenv
 from lib.workflow_builder import create_workflow
 from lib.workflow_planner import interactive_workflow_planning, gather_user_responses, enrich_steps_with_data, generate_n8n_workflow_with_complete_info
 from routes.tools.gsuite import sheets, gmail
-from routes import auth, workflows, videos
+from routes import auth, workflows, videos, workflow_chat
 from middleware.auth import require_auth
 from typing import Dict, Optional, Any, List
 from services import workflow_service, video_service
-
+import json
 
 load_dotenv()
 app = FastAPI()
@@ -29,10 +29,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(workflows.router, prefix="/workflows", tags=["Workflows"])
 app.include_router(videos.router, prefix="/videos", tags=["Videos"])
+app.include_router(workflow_chat.router, tags=["Workflow Chat"])
 app.include_router(sheets.router, prefix="/tools/gsuite/sheets", tags=["Google Sheets Tools"])
 app.include_router(gmail.router, prefix="/tools/gsuite/gmail", tags=["Gmail Tools"])
 
@@ -87,53 +87,13 @@ async def get_upload_url(req: UploadUrlRequest, user: Dict = Depends(require_aut
                 'Key': key,
                 'ContentType': req.fileType
             },
-            ExpiresIn=3600  # Increased to 1 hour for large video uploads
+            ExpiresIn=3600
         )
 
         return {"url": presigned_url, "key": key}
 
     except ClientError as e:
         raise HTTPException(status_code=500, detail=f"AWS Error: {str(e)}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/test-workflow")
-async def test_workflow():
-    """Test endpoint to generate a sample workflow that calls our backend"""
-    sample_steps = [
-        {
-            "action": "Read email addresses from Google Sheets",
-            "service": "googleSheets",
-            "operation": "readRange",
-            "parameters": {
-                "spreadsheet_id": "sample_sheet_123",
-                "range": "B2:B10"
-            }
-        },
-        {
-            "action": "Create Gmail draft with CC recipients",
-            "service": "gmail",
-            "operation": "createDraft",
-            "parameters": {
-                "to": "",
-                "cc": "{{emails_from_sheet}}",
-                "subject": "Weekly Report",
-                "body": "Please find the weekly report attached."
-            }
-        }
-    ]
-
-    try:
-        workflow_result = create_workflow(
-            steps=sample_steps,
-            workflow_name="Test Backend Integration Workflow",
-            user_id="test_user_123"
-        )
-        return {
-            "message": "Sample workflow generated successfully",
-            "workflow": workflow_result.get("workflow"),
-            "instructions": "Import this workflow JSON into n8n to see HTTP requests to our backend"
-        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -147,18 +107,16 @@ async def process_video(req: VideoRequest, user: Dict = Depends(require_auth)):
 
         print(f"Processing video for user {user_id}...")
 
-        # Process video and extract frames
         result = process_video_from_s3(req.key, bucket, req.interval_seconds)
 
         print("Generating steps from frames...")
 
-        # Generate steps from frames
-        steps = generate_steps(result["frames"], len(result["frames"]))
+        steps_raw = generate_steps(result["frames"], len(result["frames"]))
+        steps: List[Dict[str, Any]] = steps_raw if isinstance(steps_raw, list) else []
         result["steps"] = steps
 
         print("Planning workflow with interactive system...")
 
-        # Use interactive workflow planning
         planning_result = interactive_workflow_planning(
             steps=steps,
             workflow_name=f"Video Workflow - {req.key.split('/')[-1]}",
@@ -261,78 +219,6 @@ async def analyze_workflow_draft(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.post("/enrich-sheet-question")
-async def enrich_sheet_question(
-    request: dict,
-    user: Dict = Depends(require_auth)
-):
-    """Enrich a sheet column question with actual column data from the spreadsheet."""
-    try:
-        user_id = user["user_id"]
-        spreadsheet_id = request.get("spreadsheet_id")
-
-        if not spreadsheet_id:
-            raise HTTPException(status_code=400, detail="spreadsheet_id is required")
-
-        # Directly call the sheet inspection logic instead of making HTTP request to self
-        from services.google_api_service import read_sheet_range
-
-        print(f"Enriching sheet question for spreadsheet {spreadsheet_id}, user {user_id}")
-
-        # Read the first row to get headers
-        headers_data = read_sheet_range(user_id, spreadsheet_id, "1:1")
-
-        if not headers_data or "values" not in headers_data or not headers_data["values"]:
-            return {
-                "success": False,
-                "error": "Could not read sheet headers. The sheet might be empty."
-            }
-
-        headers = headers_data["values"][0] if headers_data["values"] else []
-
-        # Create column mapping (A, B, C, etc. -> header names)
-        column_map = {}
-        for idx, header in enumerate(headers):
-            col_letter = chr(65 + idx)  # A=65 in ASCII
-            column_map[col_letter] = header if header else f"Column {col_letter}"
-
-        # Read sample data (next 3 rows after header)
-        sample_range = "2:4"
-        sample_data_result = read_sheet_range(user_id, spreadsheet_id, sample_range)
-
-        sample_data = []
-        if sample_data_result and "values" in sample_data_result:
-            for row in sample_data_result["values"]:
-                row_data = {}
-                for idx, value in enumerate(row):
-                    col_letter = chr(65 + idx)
-                    row_data[col_letter] = value
-                sample_data.append(row_data)
-
-        sheet_data = {
-            "spreadsheet_id": spreadsheet_id,
-            "headers": column_map,
-            "sample_data": sample_data,
-            "total_columns": len(headers),
-            "sample_row_count": len(sample_data)
-        }
-
-        print(f"Sheet data enriched successfully: {len(headers)} columns, {len(sample_data)} sample rows")
-
-        return {
-            "success": True,
-            "sheet_data": sheet_data
-        }
-
-    except Exception as e:
-        print(f"Error enriching sheet question: {str(e)}")
-        return {
-            "success": False,
-            "error": f"Failed to inspect sheet: {str(e)}"
-        }
-
-
 class PlanWorkflowRequest(BaseModel):
     steps: List[Dict[str, Any]]
     workflow_name: str
@@ -358,13 +244,15 @@ async def plan_workflow(
 
         if planning_result["status"] == "needs_input":
             # Return questions to user
+            print(f"Creating draft workflow with steps type: {type(request.steps)}, steps: {request.steps[:2] if isinstance(request.steps, list) else request.steps}")
             saved_workflow = workflow_service.create_workflow(
                 user_id=user_id,
                 name=f"{request.workflow_name} (Pending)",
                 steps=request.steps,
                 video_key=request.video_key,
                 description=f"Workflow pending user input",
-                status="draft"
+                status="draft",
+                missing_info=planning_result["questions"]
             )
 
             return {
@@ -458,8 +346,11 @@ IMPORTANT:
             temperature=0.7,
             max_tokens=2000
         )
-
-        response_text = response.choices[0].message.content.strip()
+    
+        if response.choices[0].message.content:
+            response_text = response.choices[0].message.content.strip()
+        else:
+            response_text = ""
 
         # Remove markdown code blocks if present
         if response_text.startswith("```"):

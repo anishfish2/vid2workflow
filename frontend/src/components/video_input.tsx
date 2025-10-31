@@ -9,7 +9,7 @@ import VideoPreview from './VideoPreview'
 import FramesDisplay from './FramesDisplay'
 import WorkflowSteps from './WorkflowSteps'
 import ErrorDisplay from './ErrorDisplay'
-import WorkflowQuestionsModal from './WorkflowQuestionsModal'
+import WorkflowChatModal from './WorkflowChatModal'
 import WorkflowReviewModal from './WorkflowReviewModal'
 
 export default function VideoInput() {
@@ -18,8 +18,7 @@ export default function VideoInput() {
   const [s3Key, setS3Key] = useState<string | null>(null)
   const [workflowSteps, setWorkflowSteps] = useState<any>(null)
   const [showReviewModal, setShowReviewModal] = useState(false)
-  const [showQuestionsModal, setShowQuestionsModal] = useState(false)
-  const [workflowQuestions, setWorkflowQuestions] = useState<any>(null)
+  const [showChatModal, setShowChatModal] = useState(false)
   const [workflowDraftId, setWorkflowDraftId] = useState<string | null>(null)
   const [workflowName, setWorkflowName] = useState<string>('')
 
@@ -141,10 +140,9 @@ export default function VideoInput() {
       const result = await response.json()
 
       // Check if workflow needs clarification
-      if (result.needs_clarification && result.questions) {
-        setWorkflowQuestions(result.questions)
+      if (result.needs_clarification) {
         setWorkflowDraftId(result.workflow_draft_id)
-        setShowQuestionsModal(true)
+        setShowChatModal(true)
       } else {
         // Workflow complete, reload page
         window.location.reload()
@@ -159,16 +157,15 @@ export default function VideoInput() {
     setWorkflowSteps(null)
   }
 
-  const handleQuestionsComplete = () => {
-    setShowQuestionsModal(false)
-    setWorkflowQuestions(null)
+  const handleChatComplete = () => {
+    setShowChatModal(false)
     setWorkflowDraftId(null)
     // Refresh the page or workflow list
     window.location.reload()
   }
 
-  const handleQuestionsCancel = () => {
-    setShowQuestionsModal(false)
+  const handleChatCancel = () => {
+    setShowChatModal(false)
   }
 
   return (
@@ -212,12 +209,11 @@ export default function VideoInput() {
         />
       )}
 
-      {showQuestionsModal && workflowQuestions && workflowDraftId && (
-        <WorkflowQuestionsModal
-          questions={workflowQuestions}
+      {showChatModal && workflowDraftId && (
+        <WorkflowChatModal
           workflowDraftId={workflowDraftId}
-          onComplete={handleQuestionsComplete}
-          onCancel={handleQuestionsCancel}
+          onComplete={handleChatComplete}
+          onCancel={handleChatCancel}
         />
       )}
     </div>

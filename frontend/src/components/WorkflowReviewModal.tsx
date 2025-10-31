@@ -95,7 +95,7 @@ export default function WorkflowReviewModal({
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-2">Review Your Workflow</h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-black mb-6">
             Here's what I'll do based on your video. You can modify it before proceeding.
           </p>
 
@@ -114,13 +114,13 @@ export default function WorkflowReviewModal({
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xl">{getStepIcon(step.service)}</span>
-                      <span className="font-semibold text-gray-900">{step.action}</span>
+                      <span className="font-semibold text-black">{step.action}</span>
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-black">
                       Service: {step.service} → {step.operation}
                     </div>
                     {step.parameters && Object.keys(step.parameters).length > 0 && (
-                      <div className="text-xs text-gray-600 mt-1 bg-gray-50 p-2 rounded">
+                      <div className="text-xs text-black mt-1 bg-gray-50 p-2 rounded">
                         Parameters: {Object.entries(step.parameters).map(([key, value]) =>
                           `${key}: ${JSON.stringify(value)}`
                         ).join(', ')}
@@ -135,11 +135,11 @@ export default function WorkflowReviewModal({
           {/* Chat Interface */}
           <div className="mb-6 border border-gray-300 rounded-lg">
             <div className="bg-gray-100 p-3 border-b border-gray-300">
-              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              <h3 className="font-semibold text-black flex items-center gap-2">
                 <span>💬</span>
                 <span>Refine Your Workflow</span>
               </h3>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-black mt-1">
                 Ask me to add, remove, or modify steps. Examples: "Add a step to filter emails by domain", "Send individual emails instead of one draft"
               </p>
             </div>
@@ -151,7 +151,7 @@ export default function WorkflowReviewModal({
                   <div className={`max-w-[80%] p-3 rounded-lg ${
                     msg.role === 'user'
                       ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      : 'bg-gray-100 text-black'
                   }`}>
                     <p className="text-sm">{msg.content}</p>
                   </div>
@@ -159,7 +159,7 @@ export default function WorkflowReviewModal({
               ))}
               {isModifying && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-900 p-3 rounded-lg">
+                  <div className="bg-gray-100 text-black p-3 rounded-lg">
                     <p className="text-sm">Thinking...</p>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export default function WorkflowReviewModal({
                   onChange={(e) => setUserMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && !isModifying && handleModifyRequest()}
                   placeholder="Ask me to modify the workflow..."
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   disabled={isModifying}
                 />
                 <button
@@ -193,7 +193,7 @@ export default function WorkflowReviewModal({
           <div className="flex gap-3 justify-end">
             <button
               onClick={onCancel}
-              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 rounded-md text-black hover:bg-gray-50"
             >
               Cancel
             </button>

@@ -8,10 +8,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Supabase client
+SUPABASE_URL = os.getenv("SUPABASE_URL") or "http://localhost:54321"
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or "your-service-key"
+
 supabase: Client = create_client(
-    os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_SERVICE_KEY")
+    SUPABASE_URL,
+    SUPABASE_SERVICE_KEY
 )
 
 
@@ -23,7 +25,9 @@ def create_workflow(
     description: Optional[str] = None,
     n8n_workflow_id: Optional[str] = None,
     n8n_workflow_data: Optional[Dict[str, Any]] = None,
-    status: str = "active"
+    status: str = "active",
+    missing_info: Optional[List[Dict[str, Any]]] = None,
+    collected_params: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
     """Create a new workflow for a user."""
     try:
@@ -36,11 +40,19 @@ def create_workflow(
             "n8n_workflow_id": n8n_workflow_id,
             "n8n_workflow_data": n8n_workflow_data,
             "status": status,
+            "missing_info": missing_info if missing_info is not None else [],
+            "collected_params": collected_params if collected_params is not None else {},
             "created_at": datetime.utcnow().isoformat(),
             "updated_at": datetime.utcnow().isoformat()
         }
 
+        print(f"[workflow_service] Inserting workflow with steps type: {type(steps)}")
+        if isinstance(steps, list) and len(steps) > 0:
+            print(f"[workflow_service] First step: {steps[0]}")
+
         response = supabase.table("workflows").insert(workflow_data).execute()
+
+        print(f"[workflow_service] Response data steps type: {type(response.data[0].get('steps')) if response.data else 'no data'}")
 
         if response.data and len(response.data) > 0:
             return response.data[0]

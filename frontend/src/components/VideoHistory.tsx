@@ -64,7 +64,7 @@ export default function VideoHistory({ onSelectVideo }: VideoHistoryProps) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Previously Uploaded Videos</h2>
-        <div className="text-center text-gray-500">Loading videos...</div>
+        <div className="text-center text-black">Loading videos...</div>
       </div>
     );
   }
@@ -82,7 +82,7 @@ export default function VideoHistory({ onSelectVideo }: VideoHistoryProps) {
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Previously Uploaded Videos</h2>
-        <div className="text-center text-gray-500">
+        <div className="text-center text-black">
           No videos uploaded yet. Upload a video above to get started.
         </div>
       </div>
@@ -107,8 +107,8 @@ export default function VideoHistory({ onSelectVideo }: VideoHistoryProps) {
           >
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-800">{video.filename}</h3>
-                <div className="text-sm text-gray-500 mt-1">
+                <h3 className="font-semibold text-black">{video.filename}</h3>
+                <div className="text-sm text-black mt-1">
                   <div>Size: {formatFileSize(video.file_size)}</div>
                   <div>Uploaded: {new Date(video.uploaded_at).toLocaleString()}</div>
                   <div className="truncate text-xs mt-1">Key: {video.s3_key}</div>
@@ -120,7 +120,7 @@ export default function VideoHistory({ onSelectVideo }: VideoHistoryProps) {
                   disabled={processingVideo === video.s3_key}
                   className={`px-4 py-2 rounded text-sm font-medium ${
                     processingVideo === video.s3_key
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-gray-300 text-black cursor-not-allowed'
                       : 'bg-blue-500 text-white hover:bg-blue-600'
                   }`}
                 >

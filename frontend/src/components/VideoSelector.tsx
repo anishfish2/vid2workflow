@@ -20,7 +20,7 @@ export default function VideoSelector({ videoFile, onVideoSelect }: VideoSelecto
         {!videoFile ? (
           <label
             htmlFor="video-file-input"
-            className="cursor-pointer flex flex-col items-center text-gray-600 hover:text-blue-600 transition p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 w-full"
+            className="cursor-pointer flex flex-col items-center text-black hover:text-blue-600 transition p-8 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 w-full"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -38,12 +38,12 @@ export default function VideoSelector({ videoFile, onVideoSelect }: VideoSelecto
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
             </svg>
             <span className="font-medium text-lg">Select a video to process</span>
-            <span className="text-sm text-gray-500 mt-1">Click or drag to upload</span>
+            <span className="text-sm text-black mt-1">Click or drag to upload</span>
           </label>
         ) : (
           <div className="text-center">
-            <p className="text-lg font-medium text-gray-700">Selected:</p>
-            <p className="text-sm text-gray-600">{videoFile.name}</p>
+            <p className="text-lg font-medium text-black">Selected:</p>
+            <p className="text-sm text-black">{videoFile.name}</p>
             <label
               htmlFor="video-file-input"
               className="text-sm text-blue-500 hover:text-blue-600 cursor-pointer mt-2 inline-block"

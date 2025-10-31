@@ -17,7 +17,7 @@ export default function FramesDisplay({ frames, frameCount }: FramesDisplayProps
 
   return (
     <div className="w-full">
-      <h3 className="text-lg font-semibold mb-4 text-gray-700">
+      <h3 className="text-lg font-semibold mb-4 text-black">
         Extracted Frames ({frameCount} total):
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -28,7 +28,7 @@ export default function FramesDisplay({ frames, frameCount }: FramesDisplayProps
               alt={`Frame at ${frame.timestamp}s`}
               className="w-full h-auto rounded"
             />
-            <p className="text-sm text-center mt-1 text-gray-600">
+            <p className="text-sm text-center mt-1 text-black">
               {frame.timestamp}s
             </p>
           </div>

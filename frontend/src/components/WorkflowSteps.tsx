@@ -14,7 +14,7 @@ export default function WorkflowSteps({ steps }: WorkflowStepsProps) {
 
   return (
     <div className="w-full max-w-4xl">
-      <h3 className="text-lg font-semibold mb-4 text-gray-700">
+      <h3 className="text-lg font-semibold mb-4 text-black">
         Generated Workflow Steps:
       </h3>
       <div className="bg-gray-50 rounded-lg p-4 space-y-3">
@@ -26,9 +26,9 @@ export default function WorkflowSteps({ steps }: WorkflowStepsProps) {
                   {index + 1}
                 </span>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-800">{step.action}</p>
+                  <p className="font-medium text-black">{step.action}</p>
                   {step.parameters && Object.keys(step.parameters).length > 0 && (
-                    <div className="mt-1 text-sm text-gray-600">
+                    <div className="mt-1 text-sm text-black">
                       {Object.entries(step.parameters).map(([key, value]) => (
                         <p key={key}>
                           <span className="font-medium">{key}:</span> {String(value)}
@@ -46,7 +46,7 @@ export default function WorkflowSteps({ steps }: WorkflowStepsProps) {
           </div>
         ) : (
           <div className="bg-white rounded p-4 shadow-sm">
-            <p className="text-gray-500">No structured steps generated. Raw response:</p>
+            <p className="text-black">No structured steps generated. Raw response:</p>
             <p className="whitespace-pre-wrap mt-2">{JSON.stringify(steps, null, 2)}</p>
           </div>
         )}

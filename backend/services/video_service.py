@@ -8,10 +8,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+SUPABASE_URL = os.getenv("SUPABASE_URL") or "http://localhost:54321"
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY") or "your-service-key"
+
 # Supabase client
 supabase: Client = create_client(
-    os.getenv("SUPABASE_URL"),
-    os.getenv("SUPABASE_SERVICE_KEY")
+    SUPABASE_URL,
+    SUPABASE_SERVICE_KEY
 )
 
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import WorkflowQuestionsModal from './WorkflowQuestionsModal';
+import WorkflowChatModal from './WorkflowChatModal';
 
 interface Workflow {
   id: string;
@@ -17,9 +17,7 @@ export default function PendingWorkflows() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
-  const [showQuestionsModal, setShowQuestionsModal] = useState(false);
-  const [workflowQuestions, setWorkflowQuestions] = useState<any>(null);
-  const [analyzingWorkflow, setAnalyzingWorkflow] = useState<string | null>(null);
+  const [showChatModal, setShowChatModal] = useState(false);
 
   useEffect(() => {
     fetchPendingWorkflows();
@@ -55,57 +53,14 @@ export default function PendingWorkflows() {
     }
   };
 
-  const handleCompleteWorkflow = async (workflow: Workflow) => {
-    // Analyze the workflow to get questions
+  const handleCompleteWorkflow = (workflow: Workflow) => {
+    // Open chat modal directly
     setSelectedWorkflow(workflow);
-    setAnalyzingWorkflow(workflow.id);
-
-    try {
-      const token = localStorage.getItem('auth_token');
-      if (!token) {
-        throw new Error('Please log in');
-      }
-
-      console.log('Analyzing workflow:', workflow.id);
-
-      // Call the backend to re-analyze and get questions
-      const response = await fetch('http://localhost:8000/analyze-workflow', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          workflow_id: workflow.id
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Analysis failed:', errorText);
-        throw new Error(`Failed to analyze workflow: ${errorText}`);
-      }
-
-      const data = await response.json();
-      console.log('Analysis result:', data);
-
-      if (data.questions && data.questions.length > 0) {
-        setWorkflowQuestions(data.questions);
-        setShowQuestionsModal(true);
-      } else {
-        alert('No additional information needed for this workflow');
-      }
-    } catch (err) {
-      console.error('Error analyzing workflow:', err);
-      alert(err instanceof Error ? err.message : 'Failed to analyze workflow');
-    } finally {
-      setAnalyzingWorkflow(null);
-    }
+    setShowChatModal(true);
   };
 
-  const handleQuestionsComplete = () => {
-    setShowQuestionsModal(false);
-    setWorkflowQuestions(null);
+  const handleChatComplete = () => {
+    setShowChatModal(false);
     setSelectedWorkflow(null);
     // Refresh to remove from pending list
     fetchPendingWorkflows();
@@ -115,9 +70,8 @@ export default function PendingWorkflows() {
     }, 500);
   };
 
-  const handleQuestionsCancel = () => {
-    setShowQuestionsModal(false);
-    setWorkflowQuestions(null);
+  const handleChatCancel = () => {
+    setShowChatModal(false);
     setSelectedWorkflow(null);
   };
 
@@ -173,11 +127,11 @@ export default function PendingWorkflows() {
             >
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h3 className="font-semibold text-gray-800">{workflow.name}</h3>
+                  <h3 className="font-semibold text-black">{workflow.name}</h3>
                   {workflow.description && (
-                    <p className="text-sm text-gray-600 mt-1">{workflow.description}</p>
+                    <p className="text-sm text-black mt-1">{workflow.description}</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-black mt-1">
                     Created: {new Date(workflow.created_at).toLocaleString()}
                   </p>
                 </div>
@@ -189,17 +143,13 @@ export default function PendingWorkflows() {
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => handleCompleteWorkflow(workflow)}
-                  disabled={analyzingWorkflow === workflow.id}
-                  className={`px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 font-medium ${
-                    analyzingWorkflow === workflow.id ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className="px-4 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 font-medium"
                 >
-                  {analyzingWorkflow === workflow.id ? 'Analyzing...' : 'Provide Missing Info'}
+                  Complete Workflow
                 </button>
                 <button
                   onClick={() => deleteWorkflow(workflow.id)}
-                  disabled={analyzingWorkflow === workflow.id}
-                  className="px-4 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:opacity-50"
+                  className="px-4 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600"
                 >
                   Delete
                 </button>
@@ -209,12 +159,11 @@ export default function PendingWorkflows() {
         </div>
       </div>
 
-      {showQuestionsModal && workflowQuestions && selectedWorkflow && (
-        <WorkflowQuestionsModal
-          questions={workflowQuestions}
+      {showChatModal && selectedWorkflow && (
+        <WorkflowChatModal
           workflowDraftId={selectedWorkflow.id}
-          onComplete={handleQuestionsComplete}
-          onCancel={handleQuestionsCancel}
+          onComplete={handleChatComplete}
+          onCancel={handleChatCancel}
         />
       )}
     </div>

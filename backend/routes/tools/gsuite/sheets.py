@@ -86,7 +86,7 @@ class SmartSearchRequest(BaseModel):
     spreadsheet_id: str
     data_type: str  # "email", "phone", "name", "number", "url", etc.
     start_row: int = 2
-    end_row: int = None
+    end_row: int | None = None
 
 @router.post("/smart-search")
 async def smart_search_sheet_api(request: SmartSearchRequest):
@@ -253,7 +253,7 @@ async def append_sheet_api(request: ToolRequest):
 async def create_spreadsheet_api(request: ToolRequest):
     """Create a new Google Spreadsheet"""
     try:
-        user_id = user["user_id"]
+        user_id = request.user_id
         title = request.params.get("title", "New Spreadsheet")
         sheet_titles = request.params.get("sheet_titles", None)
 
@@ -311,7 +311,6 @@ async def copy_sheet_api(request: ToolRequest):
 
         print(f"Copying from {source_range} in sheet {spreadsheet_id} for user {user_id}")
 
-        # Read the data from source range
         data = read_sheet_range(user_id, spreadsheet_id, source_range)
 
         return ToolResponse(
