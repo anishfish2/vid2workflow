@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import WorkflowEditChatModal from '@/components/WorkflowEditChatModal';
 
 interface Workflow {
   id: string;
@@ -22,6 +23,7 @@ export default function WorkflowDetailPage() {
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     fetchWorkflow();
@@ -150,14 +152,24 @@ export default function WorkflowDetailPage() {
             )}
           </div>
 
-          {workflow.n8n_workflow_id && (
-            <button
-              onClick={openInN8n}
-              className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Open in n8n
-            </button>
-          )}
+          <div className="mt-4 flex gap-2">
+            {workflow.n8n_workflow_id && (
+              <button
+                onClick={openInN8n}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Open in n8n
+              </button>
+            )}
+            {workflow.status === 'active' && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="flex-1 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+              >
+                ✏️ Edit Workflow
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Steps */}
@@ -212,6 +224,19 @@ export default function WorkflowDetailPage() {
             </pre>
           </div>
         </details>
+
+        {/* Edit Modal */}
+        {showEditModal && workflow && (
+          <WorkflowEditChatModal
+            workflowId={workflow.id}
+            workflowName={workflow.name}
+            onClose={() => setShowEditModal(false)}
+            onWorkflowUpdated={() => {
+              fetchWorkflow();
+              setShowEditModal(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -52,8 +52,6 @@ def create_workflow(
 
         response = supabase.table("workflows").insert(workflow_data).execute()
 
-        print(f"[workflow_service] Response data steps type: {type(response.data[0].get('steps')) if response.data else 'no data'}")
-
         if response.data and len(response.data) > 0:
             return response.data[0]
         else:

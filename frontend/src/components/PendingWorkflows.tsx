@@ -101,20 +101,71 @@ export default function PendingWorkflows() {
     }
   };
 
+  const createTestWorkflow = async () => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      alert('Please log in first');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/create-test-workflow', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert('Test workflow created! Check your pending workflows.');
+        fetchPendingWorkflows();
+      } else {
+        alert('Failed to create test workflow');
+      }
+    } catch (err) {
+      alert('Error creating test workflow');
+    }
+  };
+
   if (loading) {
     return null; // Don't show anything while loading
   }
 
   if (error || pendingWorkflows.length === 0) {
-    return null; // Don't show section if no pending workflows
+    // Still show the test workflow button even if no pending workflows
+    return (
+      <div className="p-8">
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-black mb-2">Developer Tools</h3>
+          <p className="text-sm text-black mb-4">
+            Create a test workflow without processing a video
+          </p>
+          <button
+            onClick={createTestWorkflow}
+            className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 font-medium"
+          >
+            Create Test Workflow
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="p-8">
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-2 text-yellow-800">
-          ⚠️ Workflows Pending Your Input
-        </h2>
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-xl font-bold text-yellow-800">
+            ⚠️ Workflows Pending Your Input
+          </h2>
+          <button
+            onClick={createTestWorkflow}
+            className="px-3 py-1 bg-purple-500 text-white rounded text-sm hover:bg-purple-600 font-medium"
+          >
+            + Create Test Workflow
+          </button>
+        </div>
         <p className="text-sm text-yellow-700 mb-4">
           These workflows need additional information to be completed.
         </p>

@@ -299,6 +299,84 @@ class WorkflowModifyRequest(BaseModel):
     current_steps: List[Dict[str, Any]]
     user_request: str
 
+@app.post("/create-test-workflow")
+async def create_test_workflow(
+    user: Dict = Depends(require_auth)
+):
+    """Create a test workflow draft for development/testing without processing a video."""
+    try:
+        user_id = user["user_id"]
+
+        # Sample workflow steps for testing
+        test_steps = [
+            {
+                "action": "Read contacts from Google Sheet",
+                "service": "googleSheets",
+                "operation": "readRange",
+                "parameters": {
+                    "spreadsheetId": "detected_id",
+                    "range": "A1:E100",
+                    "firstRowAsHeader": True
+                }
+            },
+            {
+                "action": "Filter contacts with valid emails",
+                "service": "function",
+                "operation": "filter",
+                "parameters": {
+                    "code": "return items.filter(item => item.json.email && item.json.email.includes('@'));"
+                }
+            },
+            {
+                "action": "Send personalized email",
+                "service": "gmail",
+                "operation": "sendEmail",
+                "parameters": {
+                    "to": "{{email}}",
+                    "subject": "Hello {{name}}",
+                    "body": "Hi {{name}},\n\nThis is a test email.\n\nBest regards"
+                }
+            }
+        ]
+
+        # Simulate missing info
+        test_missing_info = [
+            {
+                "step_index": 0,
+                "step_description": "Read contacts from Google Sheet",
+                "fields": [
+                    {
+                        "id": "spreadsheet_id",
+                        "question": "What is the Google Sheets ID?",
+                        "type": "string",
+                        "required": True
+                    }
+                ]
+            }
+        ]
+
+        # Create draft workflow
+        saved_workflow = workflow_service.create_workflow(
+            user_id=user_id,
+            name="Test Workflow (Draft)",
+            steps=test_steps,
+            description="Test workflow for development - no video required",
+            status="draft",
+            missing_info=test_missing_info
+        )
+
+        return {
+            "success": True,
+            "workflow_draft_id": saved_workflow.get("id"),
+            "message": "Test workflow created successfully",
+            "steps": test_steps
+        }
+
+    except Exception as e:
+        print(f"Error creating test workflow: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/modify-workflow")
 async def modify_workflow(
     request: WorkflowModifyRequest,
@@ -425,6 +503,63 @@ Keep your answer brief and actionable."""
         }
 
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class LLMProcessRequest(BaseModel):
+    prompt: str
+    input_data: Any
+    model: str = "gpt-4o-mini"
+    temperature: float = 0.7
+    max_tokens: int = 2000
+
+@app.post("/llm-process")
+async def llm_process(
+    request: LLMProcessRequest
+):
+    """
+    Generic LLM processing endpoint for workflows.
+
+    This allows workflows to use LLM capabilities for tasks like:
+    - Summarization
+    - Classification
+    - Text generation
+    - Data extraction
+    - Any other LLM-suitable task
+    """
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        # Build the prompt with input data
+        full_prompt = f"""{request.prompt}
+
+INPUT DATA:
+{json.dumps(request.input_data, indent=2)}
+
+Please process this data according to the instructions above."""
+
+        response = client.chat.completions.create(
+            model=request.model,
+            messages=[
+                {"role": "system", "content": "You are a helpful AI assistant processing data for workflow automation."},
+                {"role": "user", "content": full_prompt}
+            ],
+            temperature=request.temperature,
+            max_tokens=request.max_tokens
+        )
+
+        result = response.choices[0].message.content
+
+        return {
+            "success": True,
+            "result": result,
+            "model_used": request.model,
+            "tokens_used": response.usage.total_tokens if hasattr(response, 'usage') else None
+        }
+
+    except Exception as e:
+        print(f"Error in LLM processing: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

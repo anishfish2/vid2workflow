@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { executeWorkflow } from '@/lib/api';
+import WorkflowEditChatModal from './WorkflowEditChatModal';
 
 interface Workflow {
   id: string;
@@ -21,6 +22,7 @@ export default function WorkflowList() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('active');
   const [executingWorkflow, setExecutingWorkflow] = useState<string | null>(null);
+  const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -269,6 +271,14 @@ export default function WorkflowList() {
                     </button>
                   </>
                 )}
+                {workflow.status === 'active' && (
+                  <button
+                    onClick={() => setEditingWorkflow(workflow)}
+                    className="px-3 py-1 bg-purple-500 text-white rounded text-sm hover:bg-purple-600"
+                  >
+                    ✏️ Edit
+                  </button>
+                )}
                 <button
                   onClick={() => router.push(`/workflows/${workflow.id}`)}
                   className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
@@ -293,6 +303,19 @@ export default function WorkflowList() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingWorkflow && (
+        <WorkflowEditChatModal
+          workflowId={editingWorkflow.id}
+          workflowName={editingWorkflow.name}
+          onClose={() => setEditingWorkflow(null)}
+          onWorkflowUpdated={() => {
+            fetchWorkflows();
+            setEditingWorkflow(null);
+          }}
+        />
       )}
     </div>
   );
